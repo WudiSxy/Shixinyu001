@@ -6,8 +6,8 @@
           <p>尚品汇欢迎您！</p>
           <p>
             请
-            <a href="" class="header-top-dl">登录</a>
-            <a href="" class="header-top-zc">注册</a>
+            <router-link to="/login">登录</router-link>
+            <router-link to="/register" class="header-top-zc">注册</router-link>
           </p>
         </div>
         <div class="header-top-right">
@@ -23,11 +23,13 @@
       </div>
     </div>
     <div class="header-logo">
-      <img src="./images/logo.png" alt="" />
+      <router-link to="/">
+        <img src="./images/logo.png" alt="" />
+      </router-link>
       <div class="header-logo-input">
         <form action="">
-          <input type="text" />
-          <button>搜索</button>
+          <input type="text" v-model="searchText" />
+          <button type="submit">搜索</button>
         </form>
       </div>
     </div>
@@ -37,6 +39,25 @@
 <script>
 export default {
   name: "Header",
+  data() {
+    return {
+      searchText: "",
+    };
+  },
+  methods: {
+    search() {
+      const { searchText } = this;
+      const location = {
+        name: "search",
+      };
+      if (searchText) {
+        location.params = {
+          searchText,
+        };
+      }
+      this.$router.push(location);
+    },
+  },
 };
 </script>
 
@@ -45,6 +66,9 @@ export default {
   width: 100%px;
   height: 30px;
   background-color: #eaeaea;
+}
+.header-top-zc {
+  padding-left: 5px;
 }
 .header-top-login {
   width: 1200px;
@@ -56,13 +80,6 @@ export default {
 }
 p {
   display: inline;
-}
-.header-top-dl {
-  padding-right: 5px;
-  border-right: 1px solid #b3aeae;
-}
-.header-top-zc {
-  padding-left: 5px;
 }
 .header-top-right a {
   padding-left: 5px;
