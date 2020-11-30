@@ -27,7 +27,7 @@
         <img src="./images/logo.png" alt="" />
       </router-link>
       <div class="header-logo-input">
-        <form action="">
+        <form action="" @submit.prevent="search">
           <input type="text" v-model="searchText" />
           <button type="submit">搜索</button>
         </form>
@@ -63,7 +63,7 @@ export default {
 
 <style lang="less" scoped>
 .header-top {
-  width: 100%px;
+  width: 100%;
   height: 30px;
   background-color: #eaeaea;
 }
