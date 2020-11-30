@@ -1,8 +1,12 @@
 <template>
   <!-- 商品分类导航 -->
   <div class="type-nav">
-    <div class="container" @mouseleave="isSearchShow = false">
-      <h2 class="all" @mouseenter="isSearchShow = true">全部商品分类</h2>
+    <div
+      class="container"
+      @mouseenter="isSearchShow = true"
+      @mouseleave="isSearchShow = false"
+    >
+      <h2 class="all">全部商品分类</h2>
       <nav class="nav">
         <a href="###">服装城</a>
         <a href="###">美妆馆</a>
@@ -29,6 +33,24 @@
                   :data-categoryType="1"
                   >{{ category.categoryName }}</a
                 >
+                <!-- 第一种方案：使用router-link跳转，问题产生太多组件，页面性能不会很好 -->
+                <!-- <router-link
+                :to="`/search?categoryName=${category.categoryName}&category1Id=${category.categoryId}`"
+                >{{ category.categoryName }}</router-link
+              > -->
+                <!-- 第二种方案：编程式导航 -->
+                <!-- <a
+                @click.prevent="
+                  $router.push({
+                    name: 'search',
+                    query: {
+                      categoryName: category.categoryName,
+                      category1Id: category.categoryId,
+                    },
+                  })
+                "
+                >{{ category.categoryName }}</a
+              > -->
               </h3>
               <div class="item-list clearfix">
                 <div class="subitem">
@@ -45,6 +67,22 @@
                         :data-categoryType="2"
                         >{{ child.categoryName }}</a
                       >
+                      <!-- <router-link
+                      :to="`/search?categoryName=${child.categoryName}&category2Id=${child.categoryId}`"
+                      >{{ child.categoryName }}</router-link
+                    > -->
+                      <!-- <a
+                      @click.prevent="
+                        $router.push({
+                          name: 'search',
+                          query: {
+                            categoryName: child.categoryName,
+                            category2Id: child.categoryId,
+                          },
+                        })
+                      "
+                      >{{ child.categoryName }}</a
+                    > -->
                     </dt>
                     <dd>
                       <!-- 三级分类名称 -->
@@ -55,9 +93,25 @@
                         <a
                           :data-categoryName="grandChild.categoryName"
                           :data-categoryId="grandChild.categoryId"
-                          :data-categoryType="1"
+                          :data-categoryType="3"
                           >{{ grandChild.categoryName }}</a
                         >
+                        <!-- <router-link
+                        :to="`/search?categoryName=${grandChild.categoryName}&category3Id=${grandChild.categoryId}`"
+                        >{{ grandChild.categoryName }}</router-link
+                      > -->
+                        <!-- <a
+                        @click.prevent="
+                          $router.push({
+                            name: 'search',
+                            query: {
+                              categoryName: grandChild.categoryName,
+                              category3Id: grandChild.categoryId,
+                            },
+                          })
+                        "
+                        >{{ grandChild.categoryName }}</a
+                      > -->
                       </em>
                     </dd>
                   </dl>
@@ -73,54 +127,75 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+
 export default {
   name: "TypeNav",
   data() {
     return {
+      // 初始化响应式数据
       isHomeShow: this.$route.path === "/",
       isSearchShow: false,
     };
   },
   computed: {
+    // 当使用vuex模块化，这种方式就不行了
+    // ...mapState(["testCount", "categoryList"]),
+    // ...mapState(["testCount", "home.categoryList"]),
+    // ...mapState(["testCount", "home"]), // 这种方式可以，需要使用 this.home.categoryList。太麻烦
+
     ...mapState({
+      // 对象中的数据，就会传递给组件
+
+      // categoryList就是组件能接受到的数据
+      // 它的值是一个函数，函数内部会调用得到值
+      // 调用时会将所有vuex数据传递进去，就是state
       categoryList: (state) => state.home.categoryList,
+      // testCount: (state) => state.testCount,
     }),
   },
   methods: {
+    // 函数直接写
+    // 注意：将来action函数名称和mutation函数名称不要重复
     ...mapActions(["getCategoryList"]),
+    // 跳转到search
     goSearch(e) {
-      console.log(e.target.dataset);
-      const { categoryname, categoryid, categorytype } = e.target.dataset;
+      const { categoryname, categoryid, categorytype } = e.target.dataset; // 元素自定义属性对象
 
+      // 需求：如何获取需要的参数？
+      // 已知：得到触发事件目标元素
+      // 解决：给元素设置自定义属性 data-xxx, 通过自定义属性得到需要的参数
+
+      // 判断是否是点中了a标签，才能跳转
       if (!categoryname) return;
 
+      // 隐藏分类列表
       this.isSearchShow = false;
 
       const location = {
         name: "search",
         query: {
-          categoryname: categoryname,
+          categoryName: categoryname,
           [`category${categorytype}Id`]: categoryid,
         },
       };
+
+      // 判断当前是否有params参数，有加上
       const { searchText } = this.$route.params;
+
       if (searchText) {
         location.params = {
           searchText,
         };
       }
+
       this.$router.push(location);
     },
   },
   mounted() {
-    if (this.categoryList.length) return;
+    // console.log(this);
+    // 调用vuex的action函数
     this.getCategoryList();
   },
-  /* async mounted() {
-    const result = await reqGetBaseCategoryList();
-
-    this.categoryList = result.slice(0, 15);
-  }, */
 };
 </script>
 
@@ -162,11 +237,11 @@ export default {
       width: 210px;
       height: 461px;
       position: absolute;
-      background: hotpink;
+      background: #fafafa;
       z-index: 999;
+      // 控制显示隐藏过渡效果
       &.search-enter-active {
-        height: 461px;
-        transition: height 1s;
+        transition: height 0.5s;
         overflow: hidden;
       }
       &.search-enter {
